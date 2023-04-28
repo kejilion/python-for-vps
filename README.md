@@ -9,14 +9,3 @@
 
 
 
-一键所有VPS测速
-
-![image](https://user-images.githubusercontent.com/131984541/235054277-167efc75-103b-4fcc-9982-26eea7e265ff.png)
-
-
-
-一键查询VPS资源占用
-
-![image](https://user-images.githubusercontent.com/131984541/235054455-3d05d85f-e446-4463-8a14-b7e717d8e630.png)
-
-
