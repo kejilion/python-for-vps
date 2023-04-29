@@ -18,7 +18,7 @@ def update_server(name, hostname, port, username, password):
         client.connect(hostname, port=port, username=username, password=password)
 
         # 执行步骤1: 更新操作
-        print(f"第一步 在 {name} 服务器上 更新")
+        print(f" {name} 更新")
         stdin, stdout, stderr = client.exec_command("apt update -y && apt install -y curl wget sudo socat htop")
         
         print(f"正在更新:")
@@ -31,20 +31,11 @@ def update_server(name, hostname, port, username, password):
             print(f"更新成功")
         else:
             print(f"更新失败")
-
-        # 关闭 SSH 连接
-        client.close()
-
         
         print()
 
 
-        # 执行步骤2: 安装 Docker
-        client = paramiko.SSHClient()
-        client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-        client.connect(hostname, port=port, username=username, password=password)
-
-        print(f"第二步 在 {name} 服务器上安装 Docker")
+        print(f"{name} 安装 Docker")
         stdin, stdout, stderr = client.exec_command("wget -qO- https://get.docker.com/ | sh")
 
         print(f"正在安装 Docker:")
@@ -58,19 +49,10 @@ def update_server(name, hostname, port, username, password):
         else:
             print(f"安装 Docker 失败")
 
-        # 关闭 SSH 连接
-        client.close()
-
-
         print()
 
 
-        # 执行步骤3: 安装 Docker Compose 
-        client = paramiko.SSHClient()
-        client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-        client.connect(hostname, port=port, username=username, password=password)
-
-        print(f"第三步 在 {name} 服务器上安装 Docker Compose")
+        print(f"{name} 安装 Docker Compose")
         stdin, stdout, stderr = client.exec_command("wget https://github.com/docker/compose/releases/download/v2.17.3/docker-compose-$(uname -s)-$(uname -m) -O /usr/local/bin/docker-compose && chmod +x /usr/local/bin/docker-compose")
 
         print(f"正在安装 Docker Compose:")
@@ -84,13 +66,6 @@ def update_server(name, hostname, port, username, password):
         else:
             print(f"安装 Docker Compose 失败")
 
-        # 关闭 SSH 连接
-        client.close()
-
-        # 连接服务器
-        client = paramiko.SSHClient()
-        client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-        client.connect(hostname, port=port, username=username, password=password)
 
         # 执行步骤1: 更新操作
         print(f"Docker Compose 版本")
@@ -100,15 +75,14 @@ def update_server(name, hostname, port, username, password):
             if stdout.channel.recv_ready():
                 print(stdout.channel.recv(1024).decode(), end="")
 
+        print()
+        print()
+
         # 关闭 SSH 连接
         client.close()
 
-        print()
-        print()
-
-
     except Exception as e:
-        print(f"连接 {name} 服务器失败")
+        print(f"连接 {name} 失败")
 
 
 # 遍历服务器列表，逐一更新
