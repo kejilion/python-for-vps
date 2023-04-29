@@ -14,7 +14,7 @@ servers = [
 def get_speedtest_results(name, hostname, port, username, password):
     try:
         # 连接服务器
-        print(f"在 {name} 服务器上测速")
+        print(f"{name} 测速")
         client = paramiko.SSHClient()
         client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         client.connect(hostname, port=port, username=username, password=password)
@@ -70,7 +70,7 @@ def get_speedtest_results(name, hostname, port, username, password):
         print()
 
     except Exception as e:
-        print(f"连接服务器 {name} 失败: {e}")
+        print(f"连接 {name} 失败 {e}")
 
 
 # 遍历服务器列表，逐一更新
