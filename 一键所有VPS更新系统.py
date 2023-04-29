@@ -10,22 +10,22 @@ servers = [
     # 添加更多服务器
 ]
 
-
 # 定义更新操作
 def update_server(name, hostname, port, username, password):
     try:
+
         # 连接服务器
         client = paramiko.SSHClient()
         client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         client.connect(hostname, port=port, username=username, password=password)
-
-        stdin, stdout, stderr = client.exec_command("apt update && apt upgrade -y")
         
-        print(f"在 {name} 服务器上 更新")
+        stdin, stdout, stderr = client.exec_command("apt update && apt full-upgrade -y")
+        
+        print(f" {name} 开始更新")        
         while not stdout.channel.exit_status_ready():
             if stdout.channel.recv_ready():
                 print(stdout.channel.recv(1024).decode(), end="")
-        
+
         # 检查更新状态
         if stderr.channel.recv_exit_status() == 0:
             print(f"更新成功")
@@ -35,10 +35,10 @@ def update_server(name, hostname, port, username, password):
         # 关闭 SSH 连接
         client.close()
 
-
         print()        
+    
     except Exception as e:
-        print(f"连接服务器 {name} 失败")
+        print(f"连接 {name} 失败 \n")
 
 # 遍历服务器列表，逐一更新
 for server in servers:
