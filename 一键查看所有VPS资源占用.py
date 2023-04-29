@@ -16,13 +16,21 @@ def get_server_info(name, hostname, port, username, password):
         client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         client.connect(hostname, port=port, username=username, password=password)
 
+        # 获取Debian系统版本
+        stdin, stdout, stderr = client.exec_command("cat /etc/os-release | grep PRETTY_NAME | awk -F= '{print $2}' | tr -d '\"'")
+        debian_version = stdout.read().decode().strip()
+
+        # 获取Linux内核版本
+        stdin, stdout, stderr = client.exec_command("uname -r")
+        kernel_version = stdout.read().decode().strip()
+
         # 获取CPU信息
         stdin, stdout, stderr = client.exec_command("cat /proc/cpuinfo | grep 'model name' | uniq")
         cpu_info = stdout.read().decode().strip()
 
         # 获取CPU占用量
         stdin, stdout, stderr = client.exec_command("top -bn1 | grep 'Cpu(s)' | awk '{print $2 + $4}'")
-        cpu_usage = stdout.read().decode().strip()
+        cpu_usage = stdout.read().decode().strip() + "%"    
 
         # 获取CPU核心数
         stdin, stdout, stderr = client.exec_command("nproc")
@@ -35,21 +43,17 @@ def get_server_info(name, hostname, port, username, password):
         # 获取硬盘信息
         stdin, stdout, stderr = client.exec_command("df -h | awk '$NF==\"/\"{printf \"%d/%dGB (%s)\", $3,$2,$5}'")
         disk_info = stdout.read().decode().strip()
-
-        # 获取网络信息
-        # stdin, stdout, stderr = client.exec_command("ifconfig eth0 | awk '/RX packets/{rx=$3;rb=$5}/TX packets/{tx=$3;tb=$5}END{printf \"RX:%.2fMB TX:%.2fMB\", (rb/(1024*1024)) , (tb/(1024*1024))}'")
-        # net_info = stdout.read().decode().strip()
-
-
         
         # 打印服务器信息
-        print(f"服务器 {name} 当前信息:")
+        print(f"{name} 当前信息:")
+        print(f"系统版本: {debian_version}")
+        print(f"Linux版本: {kernel_version}")   
         print(f"CPU架构: {cpu_info}")
         print(f"CPU占用: {cpu_usage}")   
         print(f"CPU核心数: {cpu_cores}")             
         print(f"内存占用: {mem_info}")
         print(f"硬盘占用: {disk_info}")
-        #print(f"流量消耗: {net_info}")        
+ 
         print()
 
         # 关闭 SSH 连接
