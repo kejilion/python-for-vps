@@ -19,7 +19,7 @@ def update_server(name, hostname, port, username, password):
         client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         client.connect(hostname, port=port, username=username, password=password)
         
-        stdin, stdout, stderr = client.exec_command("apt update && apt full-upgrade -y")
+        stdin, stdout, stderr = client.exec_command("DEBIAN_FRONTEND=noninteractive apt update && DEBIAN_FRONTEND=noninteractive apt full-upgrade -y")        
         
         print(f" {name} 开始更新")        
         while not stdout.channel.exit_status_ready():
