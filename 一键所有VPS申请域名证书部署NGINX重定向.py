@@ -39,6 +39,23 @@ def update_server(name, hostname, port, username, password, domain):
         print()
 
 
+        print(f"{name} 安装 Docker")
+        stdin, stdout, stderr = client.exec_command("wget -qO- https://get.docker.com/ | sh")
+
+        print(f"正在安装 Docker:")
+        while not stdout.channel.exit_status_ready():
+            if stdout.channel.recv_ready():
+                print(stdout.channel.recv(1024).decode(), end="")
+
+        # 检查执行状态
+        if stderr.channel.recv_exit_status() == 0:
+            print(f"安装 Docker 成功")
+        else:
+            print(f"安装 Docker 失败")
+
+        print()        
+        
+        
         print(f"{name} 创建nginx目录")
         stdin, stdout, stderr = client.exec_command("mkdir -p /home/nginx\ntouch /home/nginx/nginx.conf\nmkdir -p /home/nginx/certs")
 
