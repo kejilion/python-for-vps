@@ -2,14 +2,11 @@ import paramiko
 
 # 定义服务器列表，包括服务器名称、IP地址、端口号、用户名、密码和解析好的域名
 servers = [
-
     {"name": "美国", "hostname": "1.1.1.1", "port": 22, "username": "root", "password": "123456", "domain": "yuming.com"},   
     {"name": "不丹", "hostname": "1.1.1.1", "port": 22, "username": "root", "password": "123456", "domain": "yuming.com"},   
     {"name": "毛里求斯", "hostname": "1.1.1.1", "port": 22, "username": "root", "password": "123456", "domain": "yuming.com"},   
     # 添加更多服务器
-
 ]
-
 
 
 # 定义更新操作
