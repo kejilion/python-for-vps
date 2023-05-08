@@ -103,7 +103,7 @@ def update_server(name, hostname, port, username, password, domain):
 
         print(f"{name} 配置nginx")
 
-        # 重定向到那个网站
+        # 反代那个端口？
         redirect = f"{hostname}:3003"
 
         stdin, stdout, stderr = client.exec_command('wget -O /home/nginx/nginx.conf https://raw.githubusercontent.com/kejilion/nginx/main/nginx1.conf && sed -i "s/yuming.com/' + domain + '/g" /home/nginx/nginx.conf && sed -i "s/0.0.0.0:0000/' + redirect + '/g" /home/nginx/nginx.conf')
