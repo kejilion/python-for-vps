@@ -53,7 +53,7 @@ def update_server(name, hostname, port, username, password):
 
 
         print(f"{name} 安装 Docker Compose")
-        stdin, stdout, stderr = client.exec_command("wget https://github.com/docker/compose/releases/download/v2.17.3/docker-compose-$(uname -s)-$(uname -m) -O /usr/local/bin/docker-compose && chmod +x /usr/local/bin/docker-compose")
+        stdin, stdout, stderr = client.exec_command("wget https://github.com/docker/compose/releases/download/v2.18.1/docker-compose-$(uname -s)-$(uname -m) -O /usr/local/bin/docker-compose && chmod +x /usr/local/bin/docker-compose")
 
         print(f"正在安装 Docker Compose:")
         while not stdout.channel.exit_status_ready():
