@@ -24,6 +24,7 @@ def update_server(name, hostname, port, username, password):
 
         # 设置 DEBIAN_FRONTEND 环境变量
         print(f"{name} 开启BBR加速")
+        stdin, stdout, stderr = client.exec_command("apt update -y && apt install -y curl wget sudo socat htop")                
         stdin, stdout, stderr = client.exec_command('cat > /etc/sysctl.conf << EOF\nnet.core.default_qdisc=fq_pie\nnet.ipv4.tcp_congestion_control=bbr\nEOF\nsudo sysctl -p\n')
         while not stdout.channel.exit_status_ready():
             if stdout.channel.recv_ready():
