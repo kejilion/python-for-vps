@@ -10,10 +10,10 @@ servers = [
 ]
 
 # 公钥路径
-# /home/nginx/certs/cert.pem
+# /home/nginx/certs/wp_cert.pem
 # 
 # 私钥路径
-# /home/nginx/certs/key.pem
+# /home/nginx/certs/wp_key.pem
 
 # 定义更新操作
 def update_server(name, hostname, port, username, password, domain):
