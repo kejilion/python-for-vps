@@ -37,7 +37,7 @@ def update_server(name, hostname, port, username, password):
         print()        
 
         print(f"{name} 下载内核")
-        stdin, stdout, stderr = client.exec_command('wget --no-check-certificate -O tcpx.sh https://raw.githubusercontent.com/ylx2016/Linux-NetSpeed/master/tcpx.sh ')
+        stdin, stdout, stderr = client.exec_command('wget --no-check-certificate -O tcpx.sh https://raw.githubusercontent.com/ylx2016/Linux-NetSpeed/master/tcpx.sh')
 
         print(f"{name} 赋予权限")                                                    
         stdin, stdout, stderr = client.exec_command('chmod +x tcpx.sh')
