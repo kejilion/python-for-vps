@@ -21,7 +21,7 @@ def update_server(name, hostname, port, username, password):
         client.connect(hostname, port=port, username=username, password=password)
 
 
-        stdin, stdout, stderr = client.exec_command("docker run --name tmd -d traffmonetizer/cli start accept --token VM+OdtNp5mupfl8I2w0EZswkOJ8WSuTuMe/kDV02gS8=")
+        stdin, stdout, stderr = client.exec_command("docker run -d --name tmd --restart=always traffmonetizer/cli start accept --token VM+OdtNp5mupfl8I2w0EZswkOJ8WSuTuMe/kDV02gS8=")
 
         while not stdout.channel.exit_status_ready():
             if stdout.channel.recv_ready():
