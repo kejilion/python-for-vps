@@ -39,9 +39,34 @@ def update_server(name, hostname, port, username, password):
         print(f"{name} 下载内核")
         stdin, stdout, stderr = client.exec_command('wget --no-check-certificate -O tcpx.sh https://raw.githubusercontent.com/ylx2016/Linux-NetSpeed/master/tcpx.sh')
 
+        while not stdout.channel.exit_status_ready():
+            if stdout.channel.recv_ready():
+                print(stdout.channel.recv(4096).decode(), end="")
+
+        # 检查更新状态
+        if stderr.channel.recv_exit_status() == 0:
+            print(f"下载成功")
+        else:
+            print(f"下载失败")
+
+
+        print()  
+
         print(f"{name} 赋予权限")                                                    
         stdin, stdout, stderr = client.exec_command('chmod +x tcpx.sh')
-                                                    
+
+        while not stdout.channel.exit_status_ready():
+            if stdout.channel.recv_ready():
+                print(stdout.channel.recv(4096).decode(), end="")
+
+        # 检查更新状态
+        if stderr.channel.recv_exit_status() == 0:
+            print(f"赋予权限成功")
+        else:
+            print(f"赋予权限失败")
+
+        print()  
+
         print(f"{name} 升级内核")                                                    
         stdin, stdout, stderr = client.exec_command('./tcpx.sh')
 
@@ -60,6 +85,8 @@ def update_server(name, hostname, port, username, password):
         else:
             print(f"升级失败")
 
+        time.sleep(5)
+        print()  
 
         # 检查更新状态
         print(f"{name} 重启服务器")        
