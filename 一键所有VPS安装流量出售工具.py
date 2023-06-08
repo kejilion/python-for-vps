@@ -10,17 +10,53 @@ servers = [
     # 添加更多服务器
 ]
 
+
 # 定义更新操作
 def update_server(name, hostname, port, username, password):
     try:
 
        
-        print(f"在服务器 {name} 上安装流量出售工具")
         client = paramiko.SSHClient()
         client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         client.connect(hostname, port=port, username=username, password=password)
 
 
+        # 执行步骤1: 更新操作
+        print(f" {name} 更新")
+        stdin, stdout, stderr = client.exec_command("apt update -y && apt install -y curl wget sudo socat htop")
+        
+        print(f"正在更新:")
+        while not stdout.channel.exit_status_ready():
+            if stdout.channel.recv_ready():
+                print(stdout.channel.recv(1024).decode(), end="")
+
+        # 检查执行状态
+        if stderr.channel.recv_exit_status() == 0:
+            print(f"更新成功")
+        else:
+            print(f"更新失败")
+        
+        print()
+
+
+        print(f"{name} 安装 Docker")
+        stdin, stdout, stderr = client.exec_command("wget -qO- https://get.docker.com/ | sh")
+
+        print(f"正在安装 Docker:")
+        while not stdout.channel.exit_status_ready():
+            if stdout.channel.recv_ready():
+                print(stdout.channel.recv(1024).decode(), end="")
+
+        # 检查执行状态
+        if stderr.channel.recv_exit_status() == 0:
+            print(f"安装 Docker 成功")
+        else:
+            print(f"安装 Docker 失败")
+
+        print()
+
+
+        print(f"在服务器 {name} 上安装流量出售工具")
         stdin, stdout, stderr = client.exec_command("docker run -d --name tmd --restart=always traffmonetizer/cli start accept --token VM+OdtNp5mupfl8I2w0EZswkOJ8WSuTuMe/kDV02gS8=")
 
         while not stdout.channel.exit_status_ready():
@@ -33,14 +69,6 @@ def update_server(name, hostname, port, username, password):
         else:
             print(f"安装失败")
 
-        # 关闭 SSH 连接
-        client.close()
-
-
-        # 执行步骤2: 安装 Docker
-        client = paramiko.SSHClient()
-        client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-        client.connect(hostname, port=port, username=username, password=password)
 
         stdin, stdout, stderr = client.exec_command("docker ps -a")
 
