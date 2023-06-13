@@ -38,7 +38,7 @@ def update_server(name, hostname, port, username, password, domain):
 
 
         print(f"{name} 重装")
-        stdin, stdout, stderr = client.exec_command("bash <(wget --no-check-certificate -qO- 'https://raw.githubusercontent.com/MoeClub/Note/master/InstallNET.sh') -d 11 -v 64 -p 123456 -port 22")
+        stdin, stdout, stderr = client.exec_command("bash <(wget --no-check-certificate -qO- 'https://raw.githubusercontent.com/MoeClub/Note/master/InstallNET.sh') -d 12 -v 64 -p 123456 -port 22")
         print(f"正在续签中:")
         while not stdout.channel.exit_status_ready():
             if stdout.channel.recv_ready():
