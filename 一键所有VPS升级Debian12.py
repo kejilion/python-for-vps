@@ -37,8 +37,7 @@ def update_server(name, hostname, port, username, password):
 
         print()  
 
-        stdin, stdout, stderr = client.exec_command("cat > /etc/apt/sources.list << EOF\ndeb http://deb.debian.org/debian testing main\ndeb-src http://deb.debian.org/debian testing main\n\ndeb http://deb.debian.org/debian-security/ testing-security main\ndeb-src http://deb.debian.org/debian-security/ testing-security main\n\ndeb http://deb.debian.org/debian testing-updates main\ndeb-src http://deb.debian.org/debian testing-updates main\nEOF")
-        
+        stdin, stdout, stderr = client.exec_command("cat > /etc/apt/sources.list << EOF\ndeb http://deb.debian.org/debian stable main\ndeb-src http://deb.debian.org/debian stable main\n\ndeb http://deb.debian.org/debian-security/ stable-security main\ndeb-src http://deb.debian.org/debian-security/ stable-security main\n\ndeb http://deb.debian.org/debian stable-updates main\ndeb-src http://deb.debian.org/debian stable-updates main\nEOF")      
         print(f"{name} 导出官方更新源")
         while not stdout.channel.exit_status_ready():
             if stdout.channel.recv_ready():
