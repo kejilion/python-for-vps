@@ -201,7 +201,7 @@ def update_server(name, hostname, port, username, password, domain):
         print()
 
         print(f"{name} 安装PHP扩展")
-        stdin, stdout, stderr = client.exec_command('docker exec php docker-php-ext-install pdo_mysql zip && docker exec php pecl install redis && docker exec php sh -c \'echo "extension=redis.so" > /usr/local/etc/php/conf.d/docker-php-ext-redis.ini\' && docker restart php')
+        stdin, stdout, stderr = client.exec_command('docker exec php docker-php-ext-install pdo_mysql zip bcmath && docker exec php pecl install redis && docker exec php sh -c \'echo "extension=redis.so" > /usr/local/etc/php/conf.d/docker-php-ext-redis.ini\' && docker restart php')
         print(f"安装中:")
         while not stdout.channel.exit_status_ready():
             if stdout.channel.recv_ready():
