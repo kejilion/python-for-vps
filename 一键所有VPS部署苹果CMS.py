@@ -124,7 +124,7 @@ def update_server(name, hostname, port, username, password, domain):
         print()
 
         print(f"{name} 配置docker-compose.yml")
-        stdin, stdout, stderr = client.exec_command('wget -O /home/web/docker-compose.yml https://raw.githubusercontent.com/kejilion/docker/main/LNMP-docker-compose.yml')
+        stdin, stdout, stderr = client.exec_command('wget -O /home/web/docker-compose.yml https://raw.githubusercontent.com/kejilion/docker/main/LNMP-docker-compose-1.yml')
         while not stdout.channel.exit_status_ready():
             if stdout.channel.recv_ready():
                 print(stdout.channel.recv(1024).decode(), end="")
