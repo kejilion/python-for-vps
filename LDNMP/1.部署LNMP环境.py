@@ -11,7 +11,7 @@ servers = [
 
 
 # 定义更新操作
-def update_server(name, hostname, port, username, password):
+def update_server(name, hostname, port, username, password, domain):
     try:
 
         # 连接服务器
@@ -97,6 +97,26 @@ def update_server(name, hostname, port, username, password):
             print(f"配置失败")
 
         print()
+
+        print(f"{name} 解除端口限制")
+        stdin, stdout, stderr = client.exec_command('iptables -P INPUT ACCEPT && \
+                                                    iptables -P FORWARD ACCEPT && \
+                                                    iptables -P OUTPUT ACCEPT && \
+                                                    iptables -F')
+        while not stdout.channel.exit_status_ready():
+            if stdout.channel.recv_ready():
+                print(stdout.channel.recv(1024).decode(), end="")
+
+        # 检查执行状态
+        if stderr.channel.recv_exit_status() == 0:
+            print(f"配置成功")
+        else:
+            print(f"配置失败")
+
+
+        print()
+
+
 
         print(f"{name} 启动环境")
         stdin, stdout, stderr = client.exec_command('cd /home/web && docker-compose up -d')
@@ -198,9 +218,12 @@ for server in servers:
     port = server["port"]
     username = server["username"]
     password = server["password"]
-    update_server(name, hostname, port, username, password)
+    domain = server["domain"]
+    update_server(name, hostname, port, username, password, domain)
 
 # 等待用户按下任意键后关闭窗口
 input("按任意键关闭窗口...")
+
+
 
 
