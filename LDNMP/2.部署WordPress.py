@@ -8,9 +8,8 @@ servers = [
 
 ]
 
-
 # 定义更新操作
-def update_server(name, hostname, port, username, password, domain, dbname):
+def update_server(name, hostname, port, username, password, domain):
     try:
 
         # 连接服务器
@@ -19,63 +18,101 @@ def update_server(name, hostname, port, username, password, domain, dbname):
         client.connect(hostname, port=port, username=username, password=password)
 
 
-        stdin, stdout, stderr = client.exec_command("docker stop nginx")
-        print(f"{name} 停止nginx")
+        print(f" {name} 更新")
+        stdin, stdout, stderr = client.exec_command("apt update -y && apt install -y curl wget sudo socat unzip")
+        
+        print(f"正在更新:")
         while not stdout.channel.exit_status_ready():
             if stdout.channel.recv_ready():
                 print(stdout.channel.recv(1024).decode(), end="")
 
         # 检查执行状态
         if stderr.channel.recv_exit_status() == 0:
-            print(f"停止成功")
+            print(f"更新成功")
         else:
-            print(f"停止失败")
+            print(f"更新失败")
+        
+        print()
 
-        print()        
+        print(f"{name} 安装 Docker")
+        stdin, stdout, stderr = client.exec_command("curl -fsSL https://get.docker.com | sh")
 
+        print(f"正在安装 Docker:")
+        while not stdout.channel.exit_status_ready():
+            if stdout.channel.recv_ready():
+                print(stdout.channel.recv(1024).decode(), end="")
 
-        print(f"{name} 申请证书")
-        cert_command = (
-            "curl https://get.acme.sh | sh && "
-            "~/.acme.sh/acme.sh --register-account -m xxxx@gmail.com --issue -d {} "
-            "--standalone --key-file /home/web/certs/{}_key.pem --cert-file /home/web/certs/{}_cert.pem --force"
-        ).format(domain, domain, domain)
-
-        # 使用 client.exec_command 执行命令，并将标准输出和标准错误重定向到 /dev/null
-        stdin, stdout, stderr = client.exec_command(f"{cert_command} > /dev/null 2>&1")
-
-        # 等待命令执行完成
-        stdout.channel.recv_exit_status()
-
-        # 检查命令的退出状态以确定是否成功执行
-        if stdout.channel.recv_exit_status() == 0:
-            print(f"申请成功")
+        # 检查执行状态
+        if stderr.channel.recv_exit_status() == 0:
+            print(f"安装 Docker 成功")
         else:
-            print(f"申请失败")
+            print(f"安装 Docker 失败")
+
+        print()
+
+        print(f"{name} 安装 Docker Compose")
+        stdin, stdout, stderr = client.exec_command('curl -L "https://github.com/docker/compose/releases/download/v2.18.1/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose && chmod +x /usr/local/bin/docker-compose')
+
+        print(f"正在安装 Docker Compose:")
+        while not stdout.channel.exit_status_ready():
+            if stdout.channel.recv_ready():
+                print(stdout.channel.recv(1024).decode(), end="")
+
+        # 检查执行状态
+        if stderr.channel.recv_exit_status() == 0:
+            print(f"安装 Docker Compose 成功")
+        else:
+            print(f"安装 Docker Compose 失败")
 
         print()
 
 
-        stdin, stdout, stderr = client.exec_command("docker start nginx")
-        print(f"{name} 启动nginx")
+        print(f"{name} 创建web目录")
+        stdin, stdout, stderr = client.exec_command("cd /home && mkdir -p web/html web/mysql web/certs && touch web/nginx.conf web/docker-compose.yml")
+
         while not stdout.channel.exit_status_ready():
             if stdout.channel.recv_ready():
                 print(stdout.channel.recv(1024).decode(), end="")
 
         # 检查执行状态
         if stderr.channel.recv_exit_status() == 0:
-            print(f"启动成功")
+            print(f"创建目录成功")
         else:
-            print(f"启动失败")
+            print(f"创建目录失败")
 
-        print()     
+        print()
 
+        print(f"{name} 申请证书")
+        stdin, stdout, stderr = client.exec_command("curl https://get.acme.sh | sh && ~/.acme.sh/acme.sh --register-account -m xxxx@gmail.com --issue -d {} --standalone --key-file /home/web/certs/key.pem --cert-file /home/web/certs/cert.pem --force".format(domain))
+        print(f"正在申请中:")
+        while not stdout.channel.exit_status_ready():
+            if stdout.channel.recv_ready():
+                print(stdout.channel.recv(1024).decode(), end="")
 
+        # 检查执行状态
+        if stderr.channel.recv_exit_status() == 0:
+            print(f"申请成功")
+        else:
+            print(f"申请失败")
 
+        print()        
 
         print(f"{name} 配置nginx")
-        stdin, stdout, stderr = client.exec_command('wget -O /home/web/conf.d/' + domain + '.conf https://raw.githubusercontent.com/kejilion/nginx/main/wordpress.com.conf && \
-                                                    sed -i "s/yuming.com/' + domain + '/g" /home/web/conf.d/' + domain + '.conf')
+        stdin, stdout, stderr = client.exec_command('wget -O /home/web/nginx.conf https://raw.githubusercontent.com/kejilion/nginx/main/nginx9.conf && sed -i "s/yuming.com/' + domain + '/g" /home/web/nginx.conf')
+        while not stdout.channel.exit_status_ready():
+            if stdout.channel.recv_ready():
+                print(stdout.channel.recv(1024).decode(), end="")
+
+        # 检查执行状态
+        if stderr.channel.recv_exit_status() == 0:
+            print(f"配置成功")
+        else:
+            print(f"配置失败")
+
+        print()
+
+        print(f"{name} 配置docker-compose.yml")
+        stdin, stdout, stderr = client.exec_command('wget -O /home/web/docker-compose.yml https://raw.githubusercontent.com/kejilion/docker/main/LNMP-docker-compose.yml')
         while not stdout.channel.exit_status_ready():
             if stdout.channel.recv_ready():
                 print(stdout.channel.recv(1024).decode(), end="")
@@ -89,35 +126,38 @@ def update_server(name, hostname, port, username, password, domain, dbname):
         print()
 
         print(f"{name} 下载网站源码-wp")
-        # 使用字符串拼接来组织命令，增加可读性
-        command = (
-            'cd /home/web/html/ && '
-            'mkdir {} && '
-            'cd {} && '
-            'wget https://cn.wordpress.org/wordpress-6.2.2-zh_CN.zip && '
-            'unzip wordpress-6.2.2-zh_CN.zip && '
-            'rm wordpress-6.2.2-zh_CN.zip && '
-            'echo "define(\'FS_METHOD\', \'direct\'); define(\'WP_REDIS_HOST\', \'redis\'); define(\'WP_REDIS_PORT\', \'6379\');" >> /home/web/html/{}/wordpress/wp-config-sample.php'
-        ).format(domain, domain, domain)
+        stdin, stdout, stderr = client.exec_command('cd /home/web && wget https://cn.wordpress.org/wordpress-6.2.2-zh_CN.zip && unzip wordpress-6.2.2-zh_CN.zip -d html && rm wordpress-6.2.2-zh_CN.zip && mv /home/web/html/wordpress/* /home/web/html/')
+        while not stdout.channel.exit_status_ready():
+            if stdout.channel.recv_ready():
+                print(stdout.channel.recv(1024).decode(), end="")
 
-        command = f"{command} > /dev/null 2>&1"
-
-        stdin, stdout, stderr = client.exec_command(command)
-        
-        stdout.channel.recv_exit_status()
-        
         # 检查执行状态
         if stderr.channel.recv_exit_status() == 0:
-            print(f"下载成功")
+            print(f"配置成功")
         else:
-            print(f"下载失败")
+            print(f"配置失败")
 
+
+        print()
+
+        print(f"{name} 启动环境")
+        stdin, stdout, stderr = client.exec_command('cd /home/web && docker-compose up -d')
+        print(f"启动中:")
+        while not stdout.channel.exit_status_ready():
+            if stdout.channel.recv_ready():
+                print(stdout.channel.recv(1024).decode(), end="")
+
+        # 检查执行状态
+        if stderr.channel.recv_exit_status() == 0:
+            print(f"启动成功")
+        else:
+            print(f"启动失败")
 
         print()
 
 
         print(f"{name} 赋予文件权限")
-        stdin, stdout, stderr = client.exec_command('docker exec nginx chmod -R 777 /var/www/html && docker exec php chmod -R 777 /var/www/html && docker exec php74 chmod -R 777 /var/www/html')
+        stdin, stdout, stderr = client.exec_command('docker exec nginx chmod -R 777 /var/www/html && docker exec php chmod -R 777 /var/www/html')
         while not stdout.channel.exit_status_ready():
             if stdout.channel.recv_ready():
                 print(stdout.channel.recv(1024).decode(), end="")
@@ -128,41 +168,39 @@ def update_server(name, hostname, port, username, password, domain, dbname):
         else:
             print(f"赋予失败")
 
-        print()        
+        print()
 
+        print(f"{name} 安装PHP扩展")
+        stdin, stdout, stderr = client.exec_command('docker exec php apt update && docker exec php apt install -y libmariadb-dev-compat libmariadb-dev libzip-dev libmagickwand-dev imagemagick && docker exec php docker-php-ext-install mysqli pdo_mysql zip exif zip gd intl && docker exec php pecl install imagick && docker exec php sh -c "echo \"extension=imagick.so\" > /usr/local/etc/php/conf.d/imagick.ini"')
 
-        print(f"{name} 创建数据库")
-        # 使用双引号将密码部分括起来，并在双引号前加上反斜杠转义
-        command = "docker exec mysql mysql -u root -p'webroot' -e 'CREATE DATABASE {}; GRANT ALL PRIVILEGES ON {}.* TO \"kejilion\"@\"%\";'".format(dbname,dbname)
-        stdin, stdout, stderr = client.exec_command(command)
-
+        print(f"安装中:")
         while not stdout.channel.exit_status_ready():
             if stdout.channel.recv_ready():
                 print(stdout.channel.recv(1024).decode(), end="")
 
         # 检查执行状态
         if stderr.channel.recv_exit_status() == 0:
-            print(f"创建数据库成功")
+            print(f"安装成功")
         else:
-            print(f"创建数据库失败")
+            print(f"安装失败")
 
-
-        print(f"{name} 重启容器")
-        stdin, stdout, stderr = client.exec_command("docker restart php && docker restart php74 && docker restart nginx ")
-
-        while not stdout.channel.exit_status_ready():
-            if stdout.channel.recv_ready():
-                print(stdout.channel.recv(1024).decode(), end="")
-
-        # 检查执行状态
-        if stderr.channel.recv_exit_status() == 0:
-            print(f"重启成功")
-        else:
-            print(f"重启失败")
 
         print()
 
 
+        print(f"{name} 重启PHP参数")
+        stdin, stdout, stderr = client.exec_command("docker restart php")
+
+        while not stdout.channel.exit_status_ready():
+            if stdout.channel.recv_ready():
+                print(stdout.channel.recv(1024).decode(), end="")
+
+        # 检查执行状态
+        if stderr.channel.recv_exit_status() == 0:
+            print(f"安装成功")
+        else:
+            print(f"安装失败")
+            
         print()
         print()
         print(f"搭建完成\nhttps://{domain}")
@@ -170,8 +208,8 @@ def update_server(name, hostname, port, username, password, domain, dbname):
         print()
 
 
-        # print()
-        # print()
+        print()
+        print()
 
         # 关闭 SSH 连接
         client.close()
@@ -189,10 +227,11 @@ for server in servers:
     username = server["username"]
     password = server["password"]
     domain = server["domain"]
-    dbname = server["dbname"]
-    update_server(name, hostname, port, username, password, domain, dbname)
+    update_server(name, hostname, port, username, password, domain)
 
 # 等待用户按下任意键后关闭窗口
 input("按任意键关闭窗口...")
+
+
 
 
