@@ -2,16 +2,13 @@ import paramiko
 
 servers = [
 
-    {"name": "美国", "hostname": "1.1.1.1", "port": 22, "username": "root", "password": "123456"},   
-    {"name": "不丹", "hostname": "1.1.1.1", "port": 22, "username": "root", "password": "123456"},   
-    {"name": "毛里求斯", "hostname": "1.1.1.1", "port": 22, "username": "root", "password": "123456"},   
-    # 添加更多服务器
+    {"name": "吉隆坡", "hostname": "1.1.1.1", "port": 22, "username": "root", "password": "123456", "dbrootpasswd": "webroot", "dbuse": "one", "dbusepasswd": "yyds", "domain": "a1.yuming.com", "dbname": "db1"},    
 
 ]
 
 
 # 定义更新操作
-def update_server(name, hostname, port, username, password, domain):
+def update_server(name, hostname, port, username, password, domain, dbrootpasswd, dbuse, dbusepasswd):
     try:
 
         # 连接服务器
@@ -20,120 +17,77 @@ def update_server(name, hostname, port, username, password, domain):
         client.connect(hostname, port=port, username=username, password=password)
 
 
-        print(f" {name} 更新系统")
-        stdin, stdout, stderr = client.exec_command("apt update -y  && apt upgrade -y && apt install -y curl wget sudo socat unzip tar htop")
-        
-        print(f"正在更新:")
-        while not stdout.channel.exit_status_ready():
-            if stdout.channel.recv_ready():
-                print(stdout.channel.recv(1024).decode(), end="")
+        print(f"{name} 更新系统")
+        stdin, stdout, stderr = client.exec_command("DEBIAN_FRONTEND=noninteractive apt update -y && DEBIAN_FRONTEND=noninteractive apt full-upgrade -y && apt install -y curl wget sudo socat unzip tar htop")
+
+        stdout.channel.recv_exit_status()  # 等待命令执行完成
 
         # 检查执行状态
         if stderr.channel.recv_exit_status() == 0:
-            print(f"更新成功")
+            print("完成")
         else:
-            print(f"更新失败")
+            print("失败")
+
         
         print()
+
 
         print(f"{name} 安装 Docker")
         stdin, stdout, stderr = client.exec_command("curl -fsSL https://get.docker.com | sh")
 
-        print(f"正在安装 Docker:")
-        while not stdout.channel.exit_status_ready():
-            if stdout.channel.recv_ready():
-                print(stdout.channel.recv(1024).decode(), end="")
+        stdout.channel.recv_exit_status()  # 等待命令执行完成
 
-        # 检查执行状态
-        if stderr.channel.recv_exit_status() == 0:
-            print(f"安装 Docker 成功")
-        else:
-            print(f"安装 Docker 失败")
 
-        print()
-
-        print(f"{name} 安装 Docker Compose")
         stdin, stdout, stderr = client.exec_command('curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose && chmod +x /usr/local/bin/docker-compose')
 
-        print(f"正在安装 Docker Compose:")
-        while not stdout.channel.exit_status_ready():
-            if stdout.channel.recv_ready():
-                print(stdout.channel.recv(1024).decode(), end="")
+        stdout.channel.recv_exit_status()  # 等待命令执行完成
 
         # 检查执行状态
         if stderr.channel.recv_exit_status() == 0:
-            print(f"安装 Docker Compose 成功")
+            print("完成")
         else:
-            print(f"安装 Docker Compose 失败")
+            print("失败")
 
         print()
 
-
-        print(f"{name} 创建web目录")
         stdin, stdout, stderr = client.exec_command("cd /home && mkdir -p web/html web/mysql web/certs web/conf.d web/redis && touch web/docker-compose.yml")
 
-        while not stdout.channel.exit_status_ready():
-            if stdout.channel.recv_ready():
-                print(stdout.channel.recv(1024).decode(), end="")
+        stdout.channel.recv_exit_status()  # 等待命令执行完成
 
-        # 检查执行状态
-        if stderr.channel.recv_exit_status() == 0:
-            print(f"创建目录成功")
-        else:
-            print(f"创建目录失败")
 
-        print()
+        command = '''wget -O /home/web/docker-compose.yml https://raw.githubusercontent.com/kejilion/docker/main/LNMP-docker-compose-4.yml && \
+                     sed -i "s/webroot/{}/g" /home/web/docker-compose.yml && \
+                     sed -i "s/kejilionYYDS/{}/g" /home/web/docker-compose.yml && \
+                     sed -i "s/kejilion/{}/g" /home/web/docker-compose.yml'''.format(dbrootpasswd, dbusepasswd, dbuse)
 
-        print(f"{name} 配置docker-compose.yml")
-        stdin, stdout, stderr = client.exec_command('wget -O /home/web/docker-compose.yml https://raw.githubusercontent.com/kejilion/docker/main/LNMP-docker-compose-4.yml')
-        while not stdout.channel.exit_status_ready():
-            if stdout.channel.recv_ready():
-                print(stdout.channel.recv(1024).decode(), end="")
+        stdin, stdout, stderr = client.exec_command(command)
 
-        # 检查执行状态
-        if stderr.channel.recv_exit_status() == 0:
-            print(f"配置成功")
-        else:
-            print(f"配置失败")
+        stdout.channel.recv_exit_status()  # 等待命令执行完成
 
-        print()
-
-        print(f"{name} 解除端口限制")
         stdin, stdout, stderr = client.exec_command('iptables -P INPUT ACCEPT && \
                                                     iptables -P FORWARD ACCEPT && \
                                                     iptables -P OUTPUT ACCEPT && \
                                                     iptables -F')
-        while not stdout.channel.exit_status_ready():
-            if stdout.channel.recv_ready():
-                print(stdout.channel.recv(1024).decode(), end="")
 
-        # 检查执行状态
-        if stderr.channel.recv_exit_status() == 0:
-            print(f"配置成功")
-        else:
-            print(f"配置失败")
+        stdout.channel.recv_exit_status()  # 等待命令执行完成
 
-
-        print()
 
 
 
         print(f"{name} 启动环境")
         stdin, stdout, stderr = client.exec_command('cd /home/web && docker-compose up -d')
-        print(f"启动中:")
-        while not stdout.channel.exit_status_ready():
-            if stdout.channel.recv_ready():
-                print(stdout.channel.recv(1024).decode(), end="")
+
+        stdout.channel.recv_exit_status()  # 等待命令执行完成
 
         # 检查执行状态
         if stderr.channel.recv_exit_status() == 0:
-            print(f"启动成功")
+            print("完成")
         else:
-            print(f"启动失败")
+            print("失败")
 
         print()
 
-        print(f"{name} 安装PHP扩展配置参数")
+        print(f"{name} PHP最新版配置")
 
         command = (
             "docker exec php apt update && "
@@ -147,19 +101,17 @@ def update_server(name, hostname, port, username, password, domain):
 
         stdin, stdout, stderr = client.exec_command(command)
 
-        while not stdout.channel.exit_status_ready():
-            if stdout.channel.recv_ready():
-                print(stdout.channel.recv(1024).decode(), end="")
+        stdout.channel.recv_exit_status()  # 等待命令执行完成
 
         # 检查执行状态
         if stderr.channel.recv_exit_status() == 0:
-            print(f"安装成功")
+            print("完成")
         else:
-            print(f"安装失败")
+            print("失败")
 
         print()
 
-        print(f"{name} 安装php74扩展配置参数")
+        print(f"{name} PHP7.4配置")
 
         command = (
             "docker exec php74 apt update && "
@@ -173,32 +125,31 @@ def update_server(name, hostname, port, username, password, domain):
 
         stdin, stdout, stderr = client.exec_command(command)
 
-        while not stdout.channel.exit_status_ready():
-            if stdout.channel.recv_ready():
-                print(stdout.channel.recv(1024).decode(), end="")
+        stdout.channel.recv_exit_status()  # 等待命令执行完成
 
         # 检查执行状态
         if stderr.channel.recv_exit_status() == 0:
-            print(f"安装成功")
+            print("完成")
         else:
-            print(f"安装失败")
+            print("失败")
 
         print()
+        print()        
 
-
-        print(f"{name} 重启PHP")
         stdin, stdout, stderr = client.exec_command('docker restart php && docker restart php74')
-        while not stdout.channel.exit_status_ready():
-            if stdout.channel.recv_ready():
-                print(stdout.channel.recv(1024).decode(), end="")
+
+        stdout.channel.recv_exit_status()  # 等待命令执行完成
+
+
+        stdin, stdout, stderr = client.exec_command('rm /home/web/docker-compose.yml')
+
+        stdout.channel.recv_exit_status()  # 等待命令执行完成
 
         # 检查执行状态
         if stderr.channel.recv_exit_status() == 0:
             print(f"搭建完成")
         else:
             print(f"搭建失败")
-
-        print()
 
         print()
         print()
@@ -219,11 +170,12 @@ for server in servers:
     username = server["username"]
     password = server["password"]
     domain = server["domain"]
-    update_server(name, hostname, port, username, password, domain)
+    dbrootpasswd = server["dbrootpasswd"]
+    dbuse = server["dbuse"]
+    dbusepasswd = server["dbusepasswd"]
+    update_server(name, hostname, port, username, password, domain, dbrootpasswd, dbuse, dbusepasswd)
 
 # 等待用户按下任意键后关闭窗口
 input("按任意键关闭窗口...")
-
-
 
 
