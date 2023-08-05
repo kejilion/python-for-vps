@@ -125,8 +125,8 @@ def update_server(name, hostname, port, username, password, domain, dbrootpasswd
             "docker exec php74 sh -c 'echo \"extension=imagick.so\" > /usr/local/etc/php/conf.d/imagick.ini' && "
             "docker exec php74 pecl install redis && "
             "docker exec php74 sh -c 'echo \"extension=redis.so\" > /usr/local/etc/php/conf.d/docker-php-ext-redis.ini'"
-            "docker exec php sh -c 'echo \"upload_max_filesize=50M \n post_max_size=50M\" > /usr/local/etc/php/conf.d/uploads.ini' && "
-            "docker exec php sh -c 'echo \"memory_limit=256M\" > /usr/local/etc/php/conf.d/memory.ini'"        
+            "docker exec php74 sh -c 'echo \"upload_max_filesize=50M \n post_max_size=50M\" > /usr/local/etc/php/conf.d/uploads.ini' && "
+            "docker exec php74 sh -c 'echo \"memory_limit=256M\" > /usr/local/etc/php/conf.d/memory.ini'"        
         
         )
 
