@@ -14,36 +14,26 @@ def update_server(name, hostname, port, username, password):
         # 设置 DEBIAN_FRONTEND 环境变量
         stdin, stdout, stderr = client.exec_command("k")
 
-        # 暂停一段时间以等待安装程序接受输入
         time.sleep(1)
 
-        # 中文
         stdin.write('13\n')
         stdin.flush()
 
-
-        # 暂停一段时间以等待安装程序接受输入
         time.sleep(1)
 
-        # 中文
         stdin.write('15\n')
         stdin.flush()
 
-        # 暂停一段时间以等待安装程序接受输入
         time.sleep(1)
 
-        # 中文
         stdin.write('1\n')
         stdin.flush()
 
-        while not stdout.channel.exit_status_ready():
-            if stdout.channel.recv_ready():
-                output = stdout.channel.recv(8192).decode()
-                print(output, end="")
+        time.sleep(1)
 
-                # 检查是否包含特定消息
-                if "shanghai" in output:
-                    client.close()
+        print("时区设置到上海")
+        client.close()
+
 
     except Exception as e:
         print(f"连接 {name} 失败\n")
