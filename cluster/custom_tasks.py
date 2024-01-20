@@ -9,6 +9,7 @@ def update_server(name, hostname, port, username, password):
         client = paramiko.SSHClient()
         client.set_missing_host_key_policy(paramiko.AutoAddPolicy())
         client.connect(hostname, port=port, username=username, password=password)
+        print("")
         print(f"{name} 已连接")
 
         stdin, stdout, stderr = client.exec_command("Customtasks")
