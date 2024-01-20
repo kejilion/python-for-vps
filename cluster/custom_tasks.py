@@ -26,8 +26,8 @@ def update_server(name, hostname, port, username, password):
             print(error)
             print(f"{name} 失败")
 
-            print("")
-            print("")
+        print("")
+        print("")
 
         
         # 关闭 SSH 连接
