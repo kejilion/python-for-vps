@@ -20,9 +20,9 @@ def update_server(name, hostname, port, username, password):
 
         # 检查更新状态
         if stderr.channel.recv_exit_status() == 0:
-            print(f"成功")
+            print(f"\033[92m{name} 成功\033[0m")  # 绿色文本
         else:
-            print(f"失败")
+            print(f"\033[91m{name} 失败\033[0m")  # 红色文本
 
 
         # 关闭 SSH 连接
