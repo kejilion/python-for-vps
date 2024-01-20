@@ -13,6 +13,8 @@ def update_server(name, hostname, port, username, password):
 
         # 设置 DEBIAN_FRONTEND 环境变量
         stdin, stdout, stderr = client.exec_command("Customtasks")
+
+        stdin, stdout, stderr = client.exec_command("sleep 1")
         
         while not stdout.channel.exit_status_ready():
             if stdout.channel.recv_ready():
