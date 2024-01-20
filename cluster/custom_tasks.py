@@ -11,14 +11,18 @@ def update_server(name, hostname, port, username, password):
         client.connect(hostname, port=port, username=username, password=password)
         print(f"{name} 已连接")
 
-        # 设置 DEBIAN_FRONTEND 环境变量
         stdin, stdout, stderr = client.exec_command("Customtasks")
         
         while not stdout.channel.exit_status_ready():
             if stdout.channel.recv_ready():
                 print(stdout.channel.recv(1024).decode(), end="")
 
-        # 检查更新状态
+        stdin, stdout, stderr = client.exec_command("sleep 1")
+        
+        while not stdout.channel.exit_status_ready():
+            if stdout.channel.recv_ready():
+                print(stdout.channel.recv(1024).decode(), end="")
+        
         if stderr.channel.recv_exit_status() == 0:
             print(f"成功")
         else:
