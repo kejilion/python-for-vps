@@ -13,14 +13,18 @@ def update_server(name, hostname, port, username, password):
 
         stdin, stdout, stderr = client.exec_command("Customtasks")
         
-        while not stdout.channel.exit_status_ready():
-            if stdout.channel.recv_ready():
-                print(stdout.channel.recv(1024).decode(), end="")
-        
-        if stderr.channel.recv_exit_status() == 0:
-            print(f"成功")
+        # 读取输出
+        output = stdout.read().decode()
+        error = stderr.read().decode()
+
+        # 检查命令执行状态
+        exit_status = stdout.channel.recv_exit_status()
+        if exit_status == 0:
+            print(output)
+            print(f"{name} 成功")
         else:
-            print(f"失败")
+            print(error)
+            print(f"{name} 失败")
 
 
         # 关闭 SSH 连接
