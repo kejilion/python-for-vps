@@ -17,9 +17,7 @@ def update_server(name, hostname, port, username, password):
         while not stdout.channel.exit_status_ready():
             if stdout.channel.recv_ready():
                 print(stdout.channel.recv(1024).decode(), end="")
-            time.sleep(1)
 
-        
         # 检查更新状态
         if stderr.channel.recv_exit_status() == 0:
             print(f"成功")
