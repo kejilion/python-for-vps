@@ -14,15 +14,21 @@ def update_server(name, hostname, port, username, password):
         # 设置 DEBIAN_FRONTEND 环境变量
         stdin, stdout, stderr = client.exec_command("curl -sS -O https://raw.githubusercontent.com/kejilion/sh/main/kejilion.sh && chmod +x kejilion.sh && ln -sf ~/kejilion.sh /usr/local/bin/k")
 
+         # 暂停一段时间以等待安装程序接受输入
+        time.sleep(1)
+
+        # 中文
+        stdin.write('y\n')
+        stdin.flush()
+
         while not stdout.channel.exit_status_ready():
             if stdout.channel.recv_ready():
-                print(stdout.channel.recv(1024).decode(), end="")
+                output = stdout.channel.recv(8192).decode()
+                print(output, end="")
 
-        # 检查更新状态
-        if stderr.channel.recv_exit_status() == 0:
-            print(f"\033[92m{name} 成功\033[0m")  # 绿色文本
-        else:
-            print(f"\033[91m{name} 失败\033[0m")  # 红色文本
+                # 检查是否包含特定消息
+                if "操作完成" in output:
+                    client.close()
 
 
         # 关闭 SSH 连接
