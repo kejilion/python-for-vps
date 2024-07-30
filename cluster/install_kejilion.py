@@ -12,7 +12,7 @@ def update_server(name, hostname, port, username, password):
         print(f"{name} 已连接")
 
         # 设置 DEBIAN_FRONTEND 环境变量
-        stdin, stdout, stderr = client.exec_command("curl -sS -O https://raw.githubusercontent.com/kejilion/sh/main/kejilion.sh && chmod +x kejilion.sh && ln -sf ~/kejilion.sh /usr/local/bin/k")
+        stdin, stdout, stderr = client.exec_command("curl -sS -O https://raw.githubusercontent.com/kejilion/sh/main/kejilion.sh && chmod +x kejilion.sh")
 
          # 暂停一段时间以等待安装程序接受输入
         time.sleep(1)
@@ -20,16 +20,6 @@ def update_server(name, hostname, port, username, password):
         # 中文
         stdin.write('y\n')
         stdin.flush()
-
-        while not stdout.channel.exit_status_ready():
-            if stdout.channel.recv_ready():
-                output = stdout.channel.recv(8192).decode()
-                print(output, end="")
-
-                # 检查是否包含特定消息
-                if "操作完成" in output:
-                    client.close()
-
 
         # 关闭 SSH 连接
         client.close()
