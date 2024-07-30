@@ -21,6 +21,13 @@ def update_server(name, hostname, port, username, password):
         stdin.write('y\n')
         stdin.flush()
 
+         # 暂停一段时间以等待安装程序接受输入
+        time.sleep(1)
+
+        # 中文
+        stdin.write('0\n')
+        stdin.flush()
+        
         # 关闭 SSH 连接
         client.close()
 
