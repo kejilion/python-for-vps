@@ -17,6 +17,11 @@ def update_server(name, hostname, port, username, password):
          # 暂停一段时间以等待安装程序接受输入
         time.sleep(1)
 
+        # 设置 DEBIAN_FRONTEND 环境变量
+        stdin, stdout, stderr = client.exec_command("k")
+
+        time.sleep(1)
+        
         # 中文
         stdin.write('y\n')
         stdin.flush()
